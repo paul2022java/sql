@@ -1,3 +1,5 @@
+-- TP SQL
+
 CREATE TABLE Pedidos
 (NUM_PEDIDO INT NOT NULL,
 FECHA_PEDIDO DATE NOT NULL,
@@ -8,11 +10,6 @@ PRODUCTO CHAR(5) NOT NULL,
 CANT INTEGER NOT NULL,
 IMPORTE FLOAT NOT NULL,
 PRIMARY KEY (NUM_PEDIDO));
-
-ALTER TABLE Pedidos ADD CONSTRAINT FK_CLIE_PED FOREIGN KEY (CLIE) REFERENCES Clientes (NUM_CLIE);
-ALTER TABLE Pedidos ADD CONSTRAINT FK_REP_PED FOREIGN KEY (REP) REFERENCES RepVentas (NUM_EMPL);
-ALTER TABLE Pedidos ADD CONSTRAINT FK_FABPROD_PED FOREIGN KEY (FAB) REFERENCES Productos (ID_FAB);
-ALTER TABLE Pedidos ADD CONSTRAINT FK_PROD_PED FOREIGN KEY (PRODUCTO) REFERENCES Productos (ID_PRODUCTO);
 
 INSERT INTO Pedidos (NUM_PEDIDO, FECHA_PEDIDO, CLIE, REP, FAB, PRODUCTO, CANT, IMPORTE)
 VALUES (58479, '1989-12-17', 2117, 106, 'REI', '2A44L', 7, 31500);
@@ -59,8 +56,6 @@ VENTAS FLOAT NOT NULL,
 PRIMARY KEY (OFICINA));
 
 
-ALTER TABLE Oficinas ADD CONSTRAINT FK_DIR_OF FOREIGN KEY (DIR) REFERENCES RepVentas(DIRECTOR);
-
 INSERT INTO Oficinas VALUES (22, 'Denver', 'Oeste', 108, 300.000, 186.042);
 INSERT INTO Oficinas VALUES (11, 'New York', 'Este', 106, 575.000, 692.637);
 INSERT INTO Oficinas VALUES (12, 'Chicago', 'Este', 104, 800.000, 735.042);
@@ -76,8 +71,6 @@ REP_CLIE INT,
 LIMITE_CREDITO FLOAT,
 PRIMARY KEY (NUM_CLIE));
 
-
-ALTER TABLE Clientes ADD CONSTRAINT FK_REP_CLIE_CLI FOREIGN KEY (REP_CLIE) REFERENCES RepVentas (NUM_EMPL);
 
 INSERT INTO Clientes VALUES (2111, 'JCP Inc', 103, 50.000);
 INSERT INTO Clientes VALUES (2102, 'Fisrt Corp', 101, 65.000);
@@ -115,9 +108,6 @@ CUOTA FLOAT,
 VENTAS FLOAT NOT NULL,
 PRIMARY KEY (NUM_EMPL));
 
-
-ALTER TABLE RepVentas ADD CONSTRAINT FK_DIRECTOR_RPV FOREIGN KEY (DIRECTOR) REFERENCES RepVentas (NUM_EMPL);
-ALTER TABLE RepVentas ADD CONSTRAINT FK_OFICINA_REP_RPV FOREIGN KEY (OFICINA_REP) REFERENCES Oficinas (OFICINA);
 
 INSERT INTO RepVentas VALUES (105, 'Bill Adams', 37, 13, 'Rep Ventas', '1988-02-12', 104, 350.000, 367.911);
 INSERT INTO RepVentas VALUES (109, 'Mary Jones', 31, 11, 'Rep Ventas', '1999-10-12', 106, 300.000, 392.725);
@@ -168,40 +158,61 @@ INSERT INTO Productos VALUES ('IMM', '887X', 'Retenedor Riostra', 475, 32);
 INSERT INTO Productos VALUES ('REI', '2A44G', 'Pasador Bisagra', 350, 14);
 
 
--- 1) 1)Lista de las Oficinas de venta de la región Este con sus objetivos y ventas 
-SELECT objetivo,ventas,region FROM oficinas WHERE region = 'Este';
+-- 1)Lista de las Oficinas de venta de la región Este con sus objetivos y ventas 
+SELECT objetivo, ventas, region 
+FROM Oficinas 
+WHERE region = 'Este';
 
 
--- 2)Lista de las Oficinas (con sus objetivos y ventas) de venta de la región Este, cuyas ventas exeden a sus objetivos, ordenadas en orden alfabético por ciudad
-SELECT objetivo, ventas,region FROM oficinas WHERE region = "Este" AND ventas > objetivo ORDER BY ciudad;
+-- 2) Lista de las Oficinas (con sus objetivos y ventas) de venta de la región Este, cuyas ventas exeden a sus objetivos, ordenadas en orden alfabético por ciudad
+SELECT objetivo, ventas, region 
+FROM Oficinas 
+WHERE region = "Este" AND ventas > objetivo 
+ORDER BY ciudad;
 
 
-3)¿Cuales son los objetivos y ventas promedio para las oficinas de la región Este?
-SELECT AVG(objetivo) AS PromedioObjetivo, AVG (ventas) AS PromedioVentas FROM oficinas WHERE region = "Este";
-
--- 4)¿Cual es el nombre, cuota y ventas del empleado número 107? 
-SELECT nombre,cuota,ventas FROM repventas WHERE num_empl = 107; 
-
-
--- 5)Lista de la ciudad, la region y el importe por encima o por debajo del objetivo para cada oficina
-SELECT ciudad,region,ventas FROM oficinas; 
+-- 3) ¿Cuales son los objetivos y ventas promedio para las oficinas de la región Este?
+SELECT AVG(objetivo) AS PromedioObjetivo, AVG(ventas) AS PromedioVentas 
+FROM Oficinas 
+WHERE region = "Este";
 
 
--- 6)Mostrar el valor de inventario para cada producto
-SELECT descripcion,precio FROM productos;
+-- 4) ¿Cual es el nombre, cuota y ventas del empleado número 107? 
+SELECT nombre, cuota, ventas 
+FROM RepVentas 
+WHERE num_empl = 107; 
 
 
--- 7)Hallar los vendedores contratados antes de 1988
-SELECT num_empl,nombre,edad,contrato FROM repventas WHERE contrato < "1988-0-0"; 
+-- 5) Lista de la ciudad, la region y el importe por encima o por debajo del objetivo para cada oficina
+SELECT ciudad, region, ventas 
+FROM Oficinas
+WHERE Oficinas.objetivo != Oficinas.ventas; 
 
 
--- 8)Lista de las oficinas cuyas ventas están por debajo del 80% del objetivo
-SELECT *FROM oficinas WHERE venta<(objetivo/100)*80;
+-- 6) Mostrar el valor de inventario para cada producto
+SELECT descripcion, precio, (precio * existencias) AS "ValorDeInventario"
+FROM Productos;
+
+
+-- 7) Hallar los vendedores contratados antes de 1988
+SELECT num_empl, nombre, edad, contrato 
+FROM RepVentas 
+WHERE contrato < "1988-0-0"; 
+
+
+-- 8) Lista de las oficinas cuyas ventas están por debajo del 80% del objetivo
+SELECT *
+FROM Oficinas 
+WHERE ventas < (objetivo/100) * 80;
 
 
 -- 9)Lista de los pedidos comprendidos entre 01 de Octubre de 1989 y el 31 de Diciembre de 1989
-SELECT * FROM pedidos WHERE fecha_pedido >= '1989-10-01' AND fecha_pedido <= '1989-12-31';
+SELECT * 
+FROM Pedidos 
+WHERE fecha_pedido >= '1989-10-01' AND fecha_pedido <= '1989-12-31';
 
 
--- 10)Hallar todos los pedidos obtenidos por cuatro vendedores específicos (107,109,101,103)
-SELECT *FROM pedidos WHERE rep IN (101, 103, 107, 109);
+-- 10) Hallar todos los pedidos obtenidos por cuatro vendedores específicos (107,109,101,103)
+SELECT *
+FROM Pedidos 
+WHERE rep IN (101, 103, 107, 109);
